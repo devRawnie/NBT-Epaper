@@ -1,5 +1,4 @@
 from epaperHandler import EPAPER
-from mergePDF import Merge
-ob = EPAPER()
-# ob.downloadPaper()
-Merge(ob.paper_path)
+from datetime import datetime
+ob = EPAPER(datetime(2020, 1, 25))
+ob.downloadPaper()
