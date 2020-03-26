@@ -22,7 +22,10 @@ class EPAPER:
             print("Status: Date set: " + self.date)
         else:
             print("Error: could not format date")
-    
+   
+    def get_paper_path(self):
+        return self.paper_path
+
     def __formatDate(self, date):
         d = {}
         if date is not None:
