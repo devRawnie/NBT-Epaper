@@ -3,6 +3,7 @@ import requests
 from datetime import datetime as dt
 from time import sleep
 from os import mkdir
+from os.path import isdir 
 
 class EPAPER:
     base_url = "http://epaper.navbharattimes.com"
@@ -16,9 +17,10 @@ class EPAPER:
         date = self.__formatDate(dt.now())
         if(len(date) > 0):
             self.date = self.date.format(day=date["day"],month=date["month"],year=date["year"])
-            self.paper_path = date + "/"
+            self.paper_path = self.date + "/"
+            print("Status: Date set: " + self.date)
         else:
-            print("error: could not format date")
+            print("Error: could not format date")
     
     def __formatDate(self, date):
         d = {}
@@ -40,36 +42,43 @@ class EPAPER:
                         )
                 )
         if response.status_code == 200:
-            mkdir(self.paper_path)
-
+            if not isdir(self.paper_path):
+                mkdir(self.paper_path)
+            soup = BeautifulSoup(response.text, "html.parser")
+            span = soup.findAll("span", {"class":"headforpagenext"})
+            print("Total %d pages" % len(span))
+            self.__fetch(len(span) + 1)
         else:
-            sleep("error: could not establish page no's, trying again in 5 seconds")
+            sleep("Error: could not establish value for page no's, trying again in 5 seconds")
             self.downloadPaper()
 
-    def __fetch(self, page, content=None):
-        if content is None:
+    def __fetch(self, page):
+        for pageno in range(1,page+1):
+            content = None
             while content is None:
+                print("Status: Fetching page no %d" % pageno)
                 response = requests.get(
                             self.base_url +
                             self.nbtepaper.format(
-                                    pgno=page,
+                                    pgno=pageno,
                                     edition=self.delhi_edition,
                                     date=self.date
                                 )
                         )
                 if response.status_code == 200:
                     content = response.text
+                    break
                 else:
-                    print("error: no response recieved, trying again in 5 seconds")
+                    print("Error: no response recieved on page %d, trying again in 5 seconds" % pageno)
                     sleep(5)
-
-        filename = "nbt_{}.html".format(page)
-        with open(filename, "w") as f:
-            for text in response.text:
-                f.write(text)                    
-                # soup = BeautifulSoup(response.text, "html.parser")
-                # print(soup.prettify())
-
+            if content is not None:     
+                filename = "nbt_{}.html".format(pageno)
+                with open(self.paper_path + filename, "w") as f:
+                    for text in response.text:
+                        f.write(text)
+            else:
+                print("Error: couldn't fetch page no %d", pageno)
 
 ob = EPAPER()
 # ob.fetch()
+ob.downloadPaper()
