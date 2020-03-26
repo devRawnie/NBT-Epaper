@@ -82,7 +82,7 @@ class EPAPER:
                     print("Error: no response recieved on page %d, trying again in 5 seconds" % pageno)
                     sleep(5)
             if content is not None:     
-                filename = self.paper_path + "nbt_{}.pdf".format(pageno)
+                filename = self.paper_path + "{:02d}.pdf".format(pageno)
                 url = self.__generatePDFURL(dt.now(), pageno)
                 print("Status: Generating File-{}".format(filename))
                 Write(filename=filename, url=url)

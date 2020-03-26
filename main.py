@@ -1,3 +1,5 @@
 from epaperHandler import EPAPER
+from mergePDF import Merge
 ob = EPAPER()
-print(ob.paper_path)
+# ob.downloadPaper()
+Merge(ob.paper_path)
