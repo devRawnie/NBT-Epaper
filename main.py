@@ -4,16 +4,17 @@ from datetime import datetime as dt
 from time import sleep
 from os import mkdir
 from os.path import isdir 
+from writetofile import Write
 
 class EPAPER:
     base_url = "http://epaper.navbharattimes.com"
+    pdf_url = "http://image.epaper.navbharattimes.com/epaperimages//{date}//{date}-md-de-{pageno}.pdf"
     delhi_edition = "13@13"
     date = "{day}@{month}@{year}"
     nbtepaper = "/paper/{pgno}-{edition}-{date}-1001.html"
     paper_path = ""
 
     def __init__(self):
-        # print(self.__formatDate(dt.date(dt.now())))
         date = self.__formatDate(dt.now())
         if(len(date) > 0):
             self.date = self.date.format(day=date["day"],month=date["month"],year=date["year"])
@@ -52,6 +53,12 @@ class EPAPER:
             sleep("Error: could not establish value for page no's, trying again in 5 seconds")
             self.downloadPaper()
 
+    def __generatePDFURL(self, date, pageno):
+        date = self.__formatDate(dt.now())
+        datestring = date["day"] + date["month"] + date["year"]
+        self.pdf_url = self.pdf_url.format(date=datestring, pageno=pageno)
+        return self.pdf_url
+
     def __fetch(self, page):
         for pageno in range(1,page+1):
             content = None
@@ -72,12 +79,11 @@ class EPAPER:
                     print("Error: no response recieved on page %d, trying again in 5 seconds" % pageno)
                     sleep(5)
             if content is not None:     
-                filename = "nbt_{}.html".format(pageno)
-                with open(self.paper_path + filename, "w") as f:
-                    for text in response.text:
-                        f.write(text)
-            else:
-                print("Error: couldn't fetch page no %d", pageno)
+                filename = self.paper_path + "nbt_{}.pdf".format(pageno)
+                print("Status: Generating File-{}".format(filename))
+                url = self.__generatePDFURL(dt.now(), pageno)
+                Write(filename=filename, url=url)
+
 
 ob = EPAPER()
 # ob.fetch()
