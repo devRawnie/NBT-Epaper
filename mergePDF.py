@@ -2,6 +2,7 @@ from PyPDF2 import PdfFileMerger, PdfFileReader
 from os import listdir
 from os.path import join
 from pathlib import Path
+from datetime import datetime as dt
 def merge(pathToFolder=None, filename=None):
     if pathToFolder is None:
         print("Error: No Path given")
@@ -20,8 +21,9 @@ def merge(pathToFolder=None, filename=None):
             print("Status: Merging file " + name)
             mergedObject.append(PdfFileReader(join(pathToFolder, name)))
     if filename is None:
-        filename = join(pathToFolder, "merged.pdf")
+        d = dt.now()
+        filename = join(pathToFolder, "nbt_{}_{}_{}.pdf".format(d.date, d.month, d.year))
     print("Status: Creating merged file '%s'" % filename)
     mergedObject.write(filename)
-    print("Status: Finished...")
+    print("Status: Finished")
     return True

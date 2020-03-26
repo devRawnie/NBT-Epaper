@@ -79,7 +79,7 @@ class EPAPER:
         for pageno in range(1,page+1):
             content = None
             while content is None:
-                print("Status: Fetching page no {} of {}".format(pageno, page+1))
+                print("Status: Fetching page no {} of {}".format(pageno, page))
                 response = requests.get(
                             self.base_url +
                             self.nbtepaper.format(
