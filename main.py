@@ -8,7 +8,7 @@ from writetofile import Write
 
 class EPAPER:
     base_url = "http://epaper.navbharattimes.com"
-    pdf_url = "http://image.epaper.navbharattimes.com/epaperimages//{date}//{date}-md-de-{pageno}.pdf"
+    pdf_url = "http://image.epaper.navbharattimes.com/epaperimages//{date}//{date}-md-de-"
     delhi_edition = "13@13"
     date = "{day}@{month}@{year}"
     nbtepaper = "/paper/{pgno}-{edition}-{date}-1001.html"
@@ -47,17 +47,17 @@ class EPAPER:
                 mkdir(self.paper_path)
             soup = BeautifulSoup(response.text, "html.parser")
             span = soup.findAll("span", {"class":"headforpagenext"})
-            print("Total %d pages" % len(span))
+            print("Total {} pages".format( len(span) + 1) )
             self.__fetch(len(span) + 1)
         else:
             sleep("Error: could not establish value for page no's, trying again in 5 seconds")
             self.downloadPaper()
 
-    def __generatePDFURL(self, date, pageno):
+    def __generatePDFURL(self, date, page):
         date = self.__formatDate(dt.now())
         datestring = date["day"] + date["month"] + date["year"]
-        self.pdf_url = self.pdf_url.format(date=datestring, pageno=pageno)
-        return self.pdf_url
+        self.pdf_url = self.pdf_url.format(date=datestring)
+        return self.pdf_url + str(page) + ".pdf"
 
     def __fetch(self, page):
         for pageno in range(1,page+1):
@@ -80,10 +80,10 @@ class EPAPER:
                     sleep(5)
             if content is not None:     
                 filename = self.paper_path + "nbt_{}.pdf".format(pageno)
-                print("Status: Generating File-{}".format(filename))
                 url = self.__generatePDFURL(dt.now(), pageno)
+                print("Status: Generating File-{}".format(filename))
                 Write(filename=filename, url=url)
-
+        print("Status: Finished")
 
 ob = EPAPER()
 # ob.fetch()
