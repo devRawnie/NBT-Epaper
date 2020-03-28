@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import requests
+from requests import get
 from datetime import datetime as dt
 from time import sleep
 from os import mkdir
@@ -57,8 +57,8 @@ class EPAPER:
         count += 1
         if count > 2:
             print("Error: Unable to download newspaper for this date")
-            return
-        response = requests.get(
+            return False
+        response = get(
                     self.base_url +
                     self.nbtepaper.format(
                             pgno=1,
@@ -77,8 +77,8 @@ class EPAPER:
                 print("Total {} pages".format( len(span) + 1) )
             else:
                 print("Error: Unable to download newspaper for this date")
-                return
-            self.__fetch(len(span) + 1)
+                return False
+            return self.__fetch(len(span) + 1)
         else:
             print("Error: could not establish value for page no's, trying again in 5 seconds")
             self.downloadPaper()
@@ -94,7 +94,7 @@ class EPAPER:
             content = None
             while content is None:
                 print("Status: Fetching page no {} of {}".format(pageno, page))
-                response = requests.get(
+                response = get(
                             self.base_url +
                             self.nbtepaper.format(
                                     pgno=pageno,
@@ -114,10 +114,11 @@ class EPAPER:
                 print("Status: Generating File-{}".format(filename))
                 if not write(filename=filename, url=url):
                     print("Error: Could not download newspaper for this date")
-                    return
+                    return False
 
         filename = self.publishDate.strftime("NBT %d %B %Y.pdf")
         if not merge(self.paper_path, filename):
             print("Error: Could not create PDF for newspaper")
             return False
         print("Status: Finished")
+        return filename

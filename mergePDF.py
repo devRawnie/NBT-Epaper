@@ -35,4 +35,4 @@ def merge(pathToFolder,filename):
     except:
         print("Error: Could not merge pdf files")
         return False
-    return True
+    return filename

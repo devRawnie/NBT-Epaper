@@ -2,6 +2,7 @@ from epaperHandler import EPAPER
 from datetime import datetime
 import re
 import sys
+from mail_handler import send
 
 def validate(date):
     pattern = "^\d{1,2}/\d{1,2}/\d{4}$"
@@ -28,5 +29,8 @@ if __name__ == "__main__":
     if publishDate is None:
         publishDate = datetime.now()
     ob = EPAPER(publishDate=publishDate)
-    ob.downloadPaper()
+    filename = ob.downloadPaper()
+    link = "http://google.com"
+    if send("rohit.is.here99@gmail.com", filename.split(".")[0], link):
+        print("Status: Finished")
     
