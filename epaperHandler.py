@@ -16,7 +16,7 @@ class EPAPER:
     paper_path = ""
     publishDate = None
     
-    def __init__(self, publishDate=dt.now(), edition=None):
+    def __init__(self, publishDate, edition=None):
         if not isinstance(publishDate, dt):
             print("Error: Invalid date entered")
             return
