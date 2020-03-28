@@ -30,7 +30,9 @@ if __name__ == "__main__":
         publishDate = datetime.now()
     ob = EPAPER(publishDate=publishDate)
     filename = ob.downloadPaper()
-    link = "http://google.com"
-    if send("rohit.is.here99@gmail.com", filename.split(".")[0], link):
-        print("Status: Finished")
-    
+    if filename:
+        link = "http://35.240.143.233/" + filename
+        if send("rohit.is.here99@gmail.com", filename.split(".")[0], link):
+            print("Status: Finished")
+    else:
+        print("Error: Could not finish successfully")    

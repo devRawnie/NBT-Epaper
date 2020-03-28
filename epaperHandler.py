@@ -120,5 +120,4 @@ class EPAPER:
         if not merge(self.paper_path, filename):
             print("Error: Could not create PDF for newspaper")
             return False
-        print("Status: Finished")
         return filename
