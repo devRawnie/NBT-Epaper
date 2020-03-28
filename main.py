@@ -1,3 +1,9 @@
 from epaperHandler import EPAPER
-ob = EPAPER(edition="14@1")
-# ob.downloadPaper()
+from datetime import datetime
+
+
+if __name__ == "__main__":
+    ob = EPAPER(publishDate=datetime())
+    ob = EPAPER()
+    ob.downloadPaper()
+    

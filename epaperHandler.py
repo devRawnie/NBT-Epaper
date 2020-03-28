@@ -24,9 +24,6 @@ class EPAPER:
         if edition is not None and self.__is_valid_edition(edition):
             self.edition = edition
             print("Status: Setting edition: %s" % edition)
-        else:
-            print("Error: Invalid session value")
-            return    
 
         self.publishDate = publishDate
         date = self.__formatDate(publishDate)
@@ -65,7 +62,7 @@ class EPAPER:
                     self.base_url +
                     self.nbtepaper.format(
                             pgno=1,
-                            edition=self.delhi_edition,
+                            edition=self.edition,
                             date=self.date
                         )
                 )
@@ -101,7 +98,7 @@ class EPAPER:
                             self.base_url +
                             self.nbtepaper.format(
                                     pgno=pageno,
-                                    edition=self.delhi_edition,
+                                    edition=self.edition,
                                     date=self.date
                                 )
                         )
@@ -118,7 +115,9 @@ class EPAPER:
                 if not write(filename=filename, url=url):
                     print("Error: Could not download newspaper for this date")
                     return
-        if not merge(self.paper_path, "merged.pdf"):
+
+        filename = self.publishDate.strftime("NBT %d %B %Y.pdf")
+        if not merge(self.paper_path, filename):
             print("Error: Could not create PDF for newspaper")
             return False
         print("Status: Finished")
