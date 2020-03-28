@@ -6,27 +6,43 @@ from os import mkdir
 from os.path import isdir 
 from writetofile import write
 from mergePDF import merge
+import re
 class EPAPER:
     base_url = "http://epaper.navbharattimes.com"
     pdf_url = "http://image.epaper.navbharattimes.com/epaperimages//{date}//{date}-md-de-"
-    delhi_edition = "13@13"
+    edition = "13@13"
     date = "{day}@{month}@{year}"
     nbtepaper = "/paper/{pgno}-{edition}-{date}-1001.html"
     paper_path = ""
     publishDate = None
-    def __init__(self, publishDate=dt.now()):
+    
+    def __init__(self, publishDate=dt.now(), edition=None):
         if not isinstance(publishDate, dt):
             print("Error: Invalid date entered")
             return
+
+        if edition is not None and self.__is_valid_edition(edition):
+            self.edition = edition
+            print("Status: Setting edition: %s" % edition)
+        else:
+            print("Error: Invalid session value")
+            return    
+
         self.publishDate = publishDate
         date = self.__formatDate(publishDate)
+        
         if(len(date) > 0):
             self.date = self.date.format(day=date["day"],month=date["month"],year=date["year"])
             self.paper_path = self.date + "/"
             print("Status: Date set: " + self.date)
         else:
-            print("Error: could not format date")
-        
+            print("Error: Could not format date")
+    
+    def __is_valid_edition(self, edition):
+        pattern = "^\d{1,2}@\d{2}$"
+        a = re.search(pattern, edition)
+        return a != None
+    
     def get_paper_path(self):
         return self.paper_path
 
@@ -56,6 +72,7 @@ class EPAPER:
         if response.status_code == 200:
             if not isdir(self.paper_path):
                 mkdir(self.paper_path)
+
             soup = BeautifulSoup(response.text, "html.parser")
             span = soup.findAll("span", {"class":"headforpagenext"})
             

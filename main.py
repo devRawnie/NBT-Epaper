@@ -1,3 +1,3 @@
 from epaperHandler import EPAPER
-ob = EPAPER()
-ob.downloadPaper()
+ob = EPAPER(edition="14@1")
+# ob.downloadPaper()

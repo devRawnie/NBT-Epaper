@@ -19,11 +19,10 @@ def merge(pathToFolder=None, filename=None):
             mergedObject.append(PdfFileReader(join(pathToFolder, name)))
     if filename is None:
         d = dt.now()
-        filename = d.strftime("%d %B %Y.pdf")
+        filename = d.strftime("NBT %d %B %Y.pdf")
     if Path(filename).suffix != ".pdf":
         print("Error: Invalid File Name")
         return False
     print("Status: Creating merged file '%s'" % filename)
     mergedObject.write(filename)
-    print("Status: Finished")
     return True
