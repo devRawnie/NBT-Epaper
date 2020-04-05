@@ -71,14 +71,15 @@ class EPAPER:
                 mkdir(self.paper_path)
 
             soup = BeautifulSoup(response.text, "html.parser")
-            span = soup.findAll("span", {"class":"headforpagenext"})
-            
-            if(len(span) > 0):
+            #changed span class from headforpagenext to pagedeselect
+            span = soup.findAll("span", {"class":"pagedeselect"})
+            pages = [ int(x.get_text().split("-")[-1]) for x in span]
+            if(len(pages) > 0):
                 print("Total {} pages".format( len(span) + 1) )
             else:
                 print("Error: Unable to download newspaper for this date")
                 return False
-            return self.__fetch(len(span) + 1)
+            return self.__fetch(pages)
         else:
             print("Error: could not establish value for page no's, trying again in 5 seconds")
             self.downloadPaper()
@@ -89,11 +90,11 @@ class EPAPER:
         self.pdf_url = self.pdf_url.format(date=datestring)
         return self.pdf_url + str(page) + ".pdf"
 
-    def __fetch(self, page):
-        for pageno in range(1,page+1):
+    def __fetch(self, pages):
+        for pageno in pages:
             content = None
             while content is None:
-                print("Status: Fetching page no {} of {}".format(pageno, page))
+                print("Status: Fetching page no {} of {}".format(pageno, len(pages)))
                 response = get(
                             self.base_url +
                             self.nbtepaper.format(

@@ -4,7 +4,7 @@ from sendgrid.helpers.mail import Mail
 from datetime import datetime
 
 def send(to_email, subject, link):
-    content = '<a href="{link}"><button style="background-color: #000000;color:white;border-radius:2px;">Daily NBT</button></a>'.format(link=link)
+    content = '<a href="{link}">{link}</a>'.format(link=link)
     subject = datetime.now().strftime("NBT Newspaper - %d %B %Y")
     print("Status: Preparing Mail")
     message = Mail(
