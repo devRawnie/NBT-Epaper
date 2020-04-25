@@ -9,8 +9,11 @@ from mergePDF import merge
 import re
 class EPAPER:
     base_url = "http://epaper.navbharattimes.com"
-    pdf_url = "http://image.epaper.navbharattimes.com/epaperimages//{date}//{date}-md-de-"
+    pdf_url = "http://image.epaper.navbharattimes.com/epaperimages//{date}//{date}-md-{region}-"
+    region = "de"
+    # region = "mu"
     edition = "13@13"
+    # edition = "16@16"
     date = "{day}@{month}@{year}"
     nbtepaper = "/paper/{pgno}-{edition}-{date}-1001.html"
     paper_path = ""
@@ -87,7 +90,7 @@ class EPAPER:
     def __generatePDFURL(self,page):
         date = self.__formatDate(self.publishDate)
         datestring = date["day"] + date["month"] + date["year"]
-        self.pdf_url = self.pdf_url.format(date=datestring)
+        self.pdf_url = self.pdf_url.format(date=datestring, region=self.region)
         return self.pdf_url + str(page) + ".pdf"
 
     def __fetch(self, pages):
