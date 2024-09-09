@@ -1,8 +1,11 @@
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from datetime import datetime as dt
 from os import listdir
 from os.path import join
 from pathlib import Path
-from datetime import datetime as dt
+
+from PyPDF2 import PdfMerger, PdfReader
+
+
 def merge(pathToFolder,filename):
     if pathToFolder is None:
         print("Error: No Path given")
@@ -12,13 +15,14 @@ def merge(pathToFolder,filename):
     if len(files) < 2:
         print("Error: Not enough files to merge")
         return False
+
     try:
-        mergedObject = PdfFileMerger()
+        mergedObject = PdfMerger()
         for name in files:
             ext = Path(name).suffix
             if ext == ".pdf" and name != filename:
                 print("Status: Merging file " + name)
-                mergedObject.append(PdfFileReader(join(pathToFolder, name)))
+                mergedObject.append(PdfReader(join(pathToFolder, name)))
 
         if filename is None:
             filename = dt.now().strftime("NBT %d %B %Y.pdf")
@@ -32,7 +36,9 @@ def merge(pathToFolder,filename):
         
         mergedObject.write(filename)
         mergedObject.close()
-    except:
-        print("Error: Could not merge pdf files")
+
+    except Exception as e:
+        print("Error: Could not merge pdf files", e)
         return False
+
     return True
