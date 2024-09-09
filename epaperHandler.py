@@ -1,21 +1,27 @@
+import re
+
 from bs4 import BeautifulSoup
-from requests import get
 from datetime import datetime as dt
-from time import sleep
 from os import mkdir
 from os.path import isdir 
+from requests import get
+from time import sleep
+
 from writetofile import write
 from mergePDF import merge
-import re
+
 class EPAPER:
-    base_url = "http://epaper.navbharattimes.com"
-    pdf_url = "http://image.epaper.navbharattimes.com/epaperimages//{date}//{date}-md-{region}-"
+    base_url = "https://epaper.navbharattimes.com/{state}/{date}/{edition_num}/page-{pgno}.html"
+    pdf_url = "https://image.mepaper.navbharattimes.com/epaperimages/{date}/{date}-md-{region}-"
     region = "de"
     # region = "mu"
     edition = "13@13"
+    state = "delhi"
+    edition_num = 13
     # edition = "16@16"
-    date = "{day}@{month}@{year}"
-    nbtepaper = "/paper/{pgno}-{edition}-{date}-1001.html"
+    in_date_format = "{day}_{month}_{year}"
+    iso_date_format = "{year}-{month}-{day}"
+
     paper_path = ""
     publishDate = None
     
@@ -31,17 +37,18 @@ class EPAPER:
         self.publishDate = publishDate
         date = self.__formatDate(publishDate)
         
-        if(len(date) > 0):
-            self.date = self.date.format(day=date["day"],month=date["month"],year=date["year"])
-            self.paper_path = self.date + "/"
-            print("Status: Date set: " + self.date)
-        else:
-            print("Error: Could not format date")
+        if len(date) == 0:
+            return print("Error: Could not format date")
+
+        self.iso_date = self.iso_date_format.format(day=date["day"],month=date["month"],year=date["year"])
+        self.in_date = self.in_date_format.format(day=date["day"],month=date["month"],year=date["year"])
+
+        self.paper_path = self.in_date + "/"
+        print("Status: Date set: " + self.in_date)
     
     def __is_valid_edition(self, edition):
-        pattern = "^\d{1,2}@\d{2}$"
-        a = re.search(pattern, edition)
-        return a != None
+        pattern = re.compile("^\\d{1,2}@\\d{2}$")
+        return True if pattern.search(edition) else False
     
     def get_paper_path(self):
         return self.paper_path
@@ -61,67 +68,54 @@ class EPAPER:
         if count > 2:
             print("Error: Unable to download newspaper for this date")
             return False
-        response = get(
-                    self.base_url +
-                    self.nbtepaper.format(
-                            pgno=1,
-                            edition=self.edition,
-                            date=self.date
-                        )
-                )
-        if response.status_code == 200:
-            if not isdir(self.paper_path):
-                mkdir(self.paper_path)
 
-            soup = BeautifulSoup(response.text, "html.parser")
-            #changed span class from headforpagenext to pagedeselect
-            span = soup.findAll("span", {"class":"pagedeselect"})
-            pages = [ int(x.get_text().split("-")[-1]) for x in span]
-            if(len(pages) > 0):
-                print("Total {} pages".format( len(span) + 1) )
-            else:
-                print("Error: Unable to download newspaper for this date")
-                return False
-            return self.__fetch(pages)
-        else:
+        request_url = self.base_url.format(pgno=1, edition_num=self.edition_num, date=self.iso_date, state=self.state)
+        response = get(request_url)
+
+        if response.status_code != 200:
             print("Error: could not establish value for page no's, trying again in 5 seconds")
-            self.downloadPaper()
+            sleep(5)
+            return self.downloadPaper(count+1)
 
-    def __generatePDFURL(self,page):
+        if not isdir(self.paper_path):
+            mkdir(self.paper_path)
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        input_tag = soup.findAll("input", {"id":"totalpages"})
+        pages = input_tag[0]['value']
+        if not pages:
+            print("Error: Unable to download newspaper for this date")
+            return False
+
+        print(f"Total {pages} pages")
+        return self.__fetch(int(pages))
+
+    def __generatePDFURL(self, page):
         date = self.__formatDate(self.publishDate)
         datestring = date["day"] + date["month"] + date["year"]
-        self.pdf_url = self.pdf_url.format(date=datestring, region=self.region)
-        return self.pdf_url + str(page) + ".pdf"
+        pdf_url = self.pdf_url.format(date=datestring, region=self.region)
+        return f"{pdf_url}{page}.pdf"
 
     def __fetch(self, pages):
-        for pageno in pages:
+        for pageno in range(1, pages+1):
             content = None
-            while content is None:
-                print("Status: Fetching page no {} of {}".format(pageno, len(pages)))
-                response = get(
-                            self.base_url +
-                            self.nbtepaper.format(
-                                    pgno=pageno,
-                                    edition=self.edition,
-                                    date=self.date
-                                )
-                        )
-                if response.status_code == 200:
-                    content = response.text
-                    break
-                else:
-                    print("Error: no response recieved on page %d, trying again in 5 seconds" % pageno)
-                    sleep(5)
-            if content is not None:     
-                filename = self.paper_path + "{:02d}.pdf".format(pageno)
-                url = self.__generatePDFURL(pageno)
-                print("Status: Generating File-{}".format(filename))
-                if not write(filename=filename, url=url):
-                    print("Error: Could not download newspaper for this date")
-                    return False
+            print("Status: Fetching page no {} of {}".format(pageno, pages))
+            request_url = self.base_url.format(pgno=pageno, edition_num=self.edition_num, date=self.iso_date, state=self.state)
+            response = get(request_url)
+            if response.status_code != 200:
+                print(f"Error: no response recieved on page {pageno}")
+                return False
+
+            filename = self.paper_path + "{:02d}.pdf".format(pageno)
+            url = self.__generatePDFURL(pageno)
+            print(f"Status: Generating File - {filename}")
+            if not write(filename=filename, url=url):
+                print("Error: Could not download newspaper for this date")
+                return False
 
         filename = self.publishDate.strftime("NBT %d %B %Y.pdf")
         if not merge(self.paper_path, filename):
             print("Error: Could not create PDF for newspaper")
             return False
+
         return filename
