@@ -4,3 +4,4 @@ env/**
 *.html
 *.pdf
 sendgrid.env
+venv/
