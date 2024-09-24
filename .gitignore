@@ -1,6 +1,6 @@
 env/**
 .vscode/**
-*pycache*/**
+__pycache__/
 *.html
 *.pdf
 sendgrid.env
