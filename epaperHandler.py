@@ -11,21 +11,19 @@ from writetofile import write
 from mergePDF import merge
 
 class EPAPER:
-    base_url = "https://epaper.navbharattimes.com/{state}/{date}/{edition_num}/page-{pgno}.html"
-    pdf_url = "https://image.mepaper.navbharattimes.com/epaperimages/{date}/{date}-md-{region}-"
-    region = "de"
-    # region = "mu"
-    edition = "13@13"
-    state = "delhi"
-    edition_num = 13
-    # edition = "16@16"
-    in_date_format = "{day}_{month}_{year}"
-    iso_date_format = "{year}-{month}-{day}"
-
-    paper_path = ""
-    publishDate = None
     
     def __init__(self, publishDate, edition=None):
+        self.base_url = "https://epaper.navbharattimes.com/{state}/{date}/{edition_num}/page-{pgno}.html"
+        self.pdf_url = "https://image.mepaper.navbharattimes.com/epaperimages/{date}/{date}-md-{region}-"
+        self.region = "de" # "mu"
+        self.edition = "13@13"
+        self.state = "delhi"
+        self.edition_num = 13 # 16
+        self.in_date_format = "{day}_{month}_{year}"
+        self.iso_date_format = "{year}-{month}-{day}"
+
+        self.paper_path = ""
+        self.publishDate = None
         if not isinstance(publishDate, dt):
             print("Error: Invalid date entered")
             return
