@@ -1,4 +1,5 @@
 import re
+import shutil
 
 from bs4 import BeautifulSoup
 from datetime import datetime as dt
@@ -95,25 +96,36 @@ class EPAPER:
         return f"{pdf_url}{page}.pdf"
 
     def __fetch(self, pages):
-        for pageno in range(1, pages+1):
-            content = None
-            print("Status: Fetching page no {} of {}".format(pageno, pages))
-            request_url = self.base_url.format(pgno=pageno, edition_num=self.edition_num, date=self.iso_date, state=self.state)
-            response = get(request_url)
-            if response.status_code != 200:
-                print(f"Error: no response recieved on page {pageno}")
-                return False
+        result = False
+        try:
+            for pageno in range(1, pages+1):
+                content = None
+                print("Status: Fetching page no {} of {}".format(pageno, pages))
+                request_url = self.base_url.format(pgno=pageno, edition_num=self.edition_num, date=self.iso_date, state=self.state)
+                response = get(request_url)
+                if response.status_code != 200:
+                    raise Exception(f"Error: no response recieved on page {pageno}")
 
-            filename = self.paper_path + "{:02d}.pdf".format(pageno)
-            url = self.__generatePDFURL(pageno)
-            print(f"Status: Generating File - {filename}")
-            if not write(filename=filename, url=url):
-                print("Error: Could not download newspaper for this date")
-                return False
+                filename = self.paper_path + "{:02d}.pdf".format(pageno)
+                url = self.__generatePDFURL(pageno)
+                print(f"Status: Generating File - {filename}")
+                if not write(filename=filename, url=url):
+                    raise Exception("Error: Could not download newspaper for this date")
 
-        filename = self.publishDate.strftime("NBT %d %B %Y.pdf")
-        if not merge(self.paper_path, filename):
-            print("Error: Could not create PDF for newspaper")
-            return False
+            filename = self.publishDate.strftime("NBT %d %B %Y.pdf")
+            if not merge(self.paper_path, filename):
+                raise Exception("Error: Could not create PDF for newspaper")
 
-        return filename
+            result = filename
+        except Exception as e:
+            print("Error in __fetch:", e)
+            result = False
+
+        finally:
+            try:
+                shutil.rmtree(self.paper_path, ignore_errors=True)
+            except Exception as shutil_error:
+                print("Error in clearing newspaper folder:", shutil_error)
+
+            return result
+

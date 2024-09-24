@@ -19,7 +19,7 @@ def validate(date):
     print("Error: Date values out of range")
     return False
 
-if __name__ == "__main__":
+def downloadPaper(event=None, context={}):
     # sys.stdout = open("{}".format(datetime.now()), "w+")
     publishDate = None
     if len(sys.argv) > 1:
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     if publishDate is None:
         publishDate = datetime.now()
-
+    statusCode = 201
     ob = EPAPER(publishDate=publishDate)
     filename = ob.downloadPaper()
     if filename:
@@ -42,5 +42,10 @@ if __name__ == "__main__":
         #     print("Status: Finished")
         #     exit(0)
     else:
+        statusCode = 500
         print("Error: Could not finish successfully")
 
+    return {"statusCode": statusCode, "body": {"date": publishDate, "paper_link": filename}}
+
+if __name__ == "__main__":
+    downloadPaper()
