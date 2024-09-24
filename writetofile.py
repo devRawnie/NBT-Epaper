@@ -1,30 +1,21 @@
 import requests
+import shutil
+
 from time import sleep
-def write(url=None, filename=None):
-    if url is not None:
-        content = None
-        count = 0
-        while True:
-            print("Status: GET Request to url: " + url)
-            content = requests.get(url)
-            print("Status: status code- %d" % content.status_code)
-            if content.status_code == 200:
-                if filename is None:
-                    filename = url.rsplit('/', 1)[-1]
-                with open(filename, "wb") as f:
-                    for c in content:
-                        f.write(c)
-                print("Status: Written {} to {}".format(url, filename))
-                return True
-            else:
-                if count > 2:
-                    print("Error: Couldn't fetch pdf. unsuccessfull attempts: %d" % count)
-                    return False
-                count += 1
-                print("Error: Couldn't fetch pdf trying again in 5 seconds")
-                sleep(5)
 
-    else:
-        print("Error: No url given")
-    
+def write(url, filename):
+    flag = True
+    try:
+        if filename is None:
+            filename = url.rsplit('/', 1)[-1]
 
+        print("Status: GET Request to url: " + url)
+        with requests.get(url, stream=True) as r:
+            with open(filename, 'wb') as f:
+                shutil.copyfileobj(r.raw, f)
+
+    except Exception as write_err:
+        print(f"Error: could not write {url} to {filename}: {write_err}")
+        flag = False
+
+    return flag
