@@ -42,7 +42,7 @@ class EPAPER:
         self.iso_date = self.iso_date_format.format(day=date["day"],month=date["month"],year=date["year"])
         self.in_date = self.in_date_format.format(day=date["day"],month=date["month"],year=date["year"])
 
-        self.paper_path = self.in_date + "/"
+        self.paper_path = f"/tmp/{self.in_date}/"
         print("Status: Date set: " + self.in_date)
     
     def __is_valid_edition(self, edition):
@@ -112,7 +112,7 @@ class EPAPER:
                 if not write(filename=filename, url=url):
                     raise Exception("Error: Could not download newspaper for this date")
 
-            filename = self.publishDate.strftime("NBT %d %B %Y.pdf")
+            filename = "/tmp/" + self.publishDate.strftime("NBT %d %B %Y.pdf")
             if not merge(self.paper_path, filename):
                 raise Exception("Error: Could not create PDF for newspaper")
 
