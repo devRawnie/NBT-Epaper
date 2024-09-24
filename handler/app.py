@@ -45,7 +45,7 @@ def downloadPaper(event=None, context={}):
         statusCode = 500
         print("Error: Could not finish successfully")
 
-    return {"statusCode": statusCode, "body": {"date": publishDate, "paper_link": filename}}
+    return {"statusCode": statusCode, "body": {"date": publishDate.isoformat(), "paper_link": filename}}
 
 if __name__ == "__main__":
     downloadPaper()
