@@ -21,7 +21,7 @@ def upload_file(filepath, bucket_name=None, object_name=None):
         if not object_name:
             object_name = f"{int(datetime.now().timestamp())}.pdf"
 
-        uploaded_file = s3_client.upload_file(filepath, bucket_name, object_name, ExtraArgs={'Metadata': {'Content-Type': 'application/pdf'})
+        uploaded_file = s3_client.upload_file(filepath, bucket_name, object_name, ExtraArgs={'Metadata': {'Content-Type': 'application/pdf'}})
         print(uploaded_file)
     except Exception as e:
         print(f"Error in upload_file: {filepath}:", e)
