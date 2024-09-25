@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 from urllib.parse import quote
 
-from epaperHandler import EPAPER
+from epaper_handler import EPAPER
 from mail_handler import send
 
 def validate(date):
