@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: NBT Epaper Handler
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 1024
+
+Resources:
+  FetchNewspaperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: handler/
+      Handler: app.downloadPaper
+      Runtime: python3.12
+      Architectures:
+      - x86_64
+      FunctionUrlConfig:
+        AuthType: NONE
+      Policies:
+        - arn:aws:iam::841162672010:policy/AWSNBTEpaperLambdaPolicy
+
