@@ -10,6 +10,8 @@ from time import sleep
 
 from writetofile import write
 from mergePDF import merge
+from s3_handler import upload_file
+
 
 class EPAPER:
     
@@ -22,7 +24,7 @@ class EPAPER:
         self.edition_num = 13 # 16
         self.in_date_format = "{day}_{month}_{year}"
         self.iso_date_format = "{year}-{month}-{day}"
-
+        self.cloudfront_url = "https://d2xk0el8g60gra.cloudfront.net"
         self.paper_path = ""
         self.publishDate = None
         if not isinstance(publishDate, dt):
@@ -112,11 +114,13 @@ class EPAPER:
                 if not write(filename=filename, url=url):
                     raise Exception("Error: Could not download newspaper for this date")
 
-            filename = "/tmp/" + self.publishDate.strftime("NBT %d %B %Y.pdf")
+            formatted_datetime = self.publishDate.strftime("NBT %d %B %Y.pdf")
+            filename = f"/tmp/{formatted_datetime}"
+            s3_filename = self.publishDate.strftime(f"{self.region}/%Y/%m/%d/paper.pdf")
             if not merge(self.paper_path, filename):
                 raise Exception("Error: Could not create PDF for newspaper")
-
-            result = filename
+            result = self.cloudfront_url + "/" + s3_filename
+            uploaded_file = upload_file(filename, "nbt-epaper", s3_filename)
         except Exception as e:
             print("Error in __fetch:", e)
             result = False
