@@ -6,3 +6,5 @@ __pycache__/
 sendgrid.env
 venv/
 .aws-sam/
+package/
+*.zip
