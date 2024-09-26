@@ -1,5 +1,9 @@
 # NBT E-Paper Handler
 
+Get today's newspaper at this URL
+
+https://fomknjverbo2erq7grhcgubxyi0rsxhq.lambda-url.ap-south-1.on.aws/
+
 ## Steps to deploy using ZIP
 
 1. Clone the repository in your local
